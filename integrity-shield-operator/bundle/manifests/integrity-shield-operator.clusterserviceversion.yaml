@@ -439,4 +439,5 @@ spec:
   maturity: alpha
   provider:
     name: Community
+  replaces: integrity-shield-operator.v0.1.6
   version: 0.3.0
