@@ -292,7 +292,7 @@ push-images-to-local: tag-images-to-local
 	docker push $(TEST_ISHIELD_OBSERVER_IMAGE_NAME_AND_VERSION)
 	docker push $(TEST_ISHIELD_OPERATOR_IMAGE_NAME_AND_VERSION)
 
-setup-test-env: create-ns create-keyring-secret
+setup-test-env:  create-ns create-keyring-secret
 	@echo
 	@echo creating test namespace
 	kubectl create ns $(TEST_NS)
@@ -349,9 +349,13 @@ install-ishield: check-kubeconfig install-crds install-operator create-cr
 uninstall-ishield: delete-cr delete-operator
 
 create-ns:
-	@echo
-	@echo creating namespace
-	kubectl create ns $(ISHIELD_NS)
+	@if [ "$(shell kubectl get ns integrity-shield-operator-system | sed -n '2 p' | awk '{print$$1}')" = integrity-shield-operator-system ]; then \
+		echo namespace already exists !;  \
+	else  \
+		echo; \
+		echo creating namespace; \
+		kubectl create ns $(ISHIELD_NS); \
+	fi
 
 install-crds:
 	@echo installing crds
@@ -409,8 +413,8 @@ setup-tmp-cr:
 	yq write -i $(TMP_CR_AC_FILE) spec.admissionController.resources.limits.memory 256Mi
 	yq write -i $(TMP_CR_AC_FILE) spec.observer.image $(TMP_OBSERVER_IMG)
 	yq write -i $(TMP_CR_AC_FILE) spec.observer.imagePullPolicy Always
-	yq write -i $(TMP_CR_AC_FILE) spec.observer.resources.limits.cpu 200m
-	yq write -i $(TMP_CR_AC_FILE) spec.observer.resources.limits.memory 256Mi
+	yq write -i $(TMP_CR_AC_FILE) spec.observer.resources.limits.cpu 100m
+	yq write -i $(TMP_CR_AC_FILE) spec.observer.resources.limits.memory 128Mi
 
 create-tmp-cr:
 	kubectl apply -f $(TMP_CR_FILE) -n $(ISHIELD_NS)
@@ -545,7 +549,6 @@ setup-olm-local:
 	$(ISHIELD_REPO_ROOT)/build/setup-olm-local.sh
 
 bundle-test-local:
-	make create-keyring-secret
 	make setup-tmp-cr
 	make setup-test-env
 	make e2e-test
