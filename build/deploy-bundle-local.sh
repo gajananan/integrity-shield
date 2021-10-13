@@ -70,7 +70,7 @@ metadata:
   name: integrity-shield-operator
   namespace: ${ISHIELD_NS}
 spec:
-  channel: ${CHANNELS}
+  channel: ${ISHIELD_DEFAULT_CHANNEL}
   installPlanApproval: Automatic
   name: integrity-shield-operator
   source: integrity-shield-operator-catalog
