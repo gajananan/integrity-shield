@@ -50,6 +50,40 @@ echo "-------------------------------------------------"
 echo "Install bundle catalogsource"
 
 cat <<EOF | kubectl create -f -
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: integrity-shield-operator-catalog
+  namespace: olm
+spec:
+  displayName: Integrity Ishield Operator
+  image: ${BUNDLE_INDX_IMAGE}
+  publisher: Community
+  sourceType: grpc
+  updateStrategy:
+    registryPoll:
+      interval: 15m
+EOF
+
+echo ""
+echo "-------------------------------------------------"
+echo "Check if integrity-shield-operator-catalog is deployed correctly."
+echo "Let's wait for integrity-shield-operator-bundle to be depoyed..."
+while true; do
+   ISHIELD_STATUS=$(kubectl get pod -n olm 2>/dev/null | grep integrity-shield-operator-catalog | awk '{print $3}')
+   READY_STATUS=$(kubectl get pod -n olm 2>/dev/null | grep integrity-shield-operator-catalog | awk '{print $2}')
+   if [[ "$ISHIELD_STATUS" == "Running" ] && [ "$READY_STATUS" == "1/1" ]]; then
+      echo
+      echo -n "===== Integrity Shield operator catalog has started, let's continue with installing subscription. ====="
+      echo
+      break
+   else
+      printf "."
+      sleep 2
+   fi
+done
+
+cat <<EOF | kubectl create -f -
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -76,18 +110,4 @@ spec:
   source: integrity-shield-operator-catalog
   sourceNamespace: olm
   startingCSV: ${STARTING_CSV}
----
-apiVersion: operators.coreos.com/v1alpha1
-kind: CatalogSource
-metadata:
-  name: integrity-shield-operator-catalog
-  namespace: olm
-spec:
-  displayName: Integrity Ishield Operator
-  image: ${BUNDLE_INDX_IMAGE}
-  publisher: Community
-  sourceType: grpc
-  updateStrategy:
-    registryPoll:
-      interval: 15m
 EOF
