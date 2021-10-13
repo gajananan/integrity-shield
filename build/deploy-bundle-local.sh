@@ -68,11 +68,11 @@ EOF
 echo ""
 echo "-------------------------------------------------"
 echo "Check if integrity-shield-operator-catalog is deployed correctly."
-echo "Let's wait for integrity-shield-operator-bundle to be depoyed..."
+echo "Let's wait for integrity-shield-operator-catalog to be deployed..."
 while true; do
    ISHIELD_STATUS=$(kubectl get pod -n olm 2>/dev/null | grep integrity-shield-operator-catalog | awk '{print $3}')
    READY_STATUS=$(kubectl get pod -n olm 2>/dev/null | grep integrity-shield-operator-catalog | awk '{print $2}')
-   if [[ "$ISHIELD_STATUS" == "Running" ] && [ "$READY_STATUS" == "1/1" ]]; then
+   if [[ "$ISHIELD_STATUS" == "Running"  && "$READY_STATUS" == "1/1" ]]; then
       echo
       echo -n "===== Integrity Shield operator catalog has started, let's continue with installing subscription. ====="
       echo
@@ -88,7 +88,9 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: ${ISHIELD_NS}
----
+EOF
+
+cat <<EOF | kubectl create -f -
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
@@ -97,7 +99,9 @@ metadata:
 spec:
   targetNamespaces:
   - ${ISHIELD_NS}
----
+EOF
+
+cat <<EOF | kubectl create -f -
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
