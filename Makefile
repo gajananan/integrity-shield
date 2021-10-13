@@ -292,7 +292,7 @@ push-images-to-local: tag-images-to-local
 	docker push $(TEST_ISHIELD_OBSERVER_IMAGE_NAME_AND_VERSION)
 	docker push $(TEST_ISHIELD_OPERATOR_IMAGE_NAME_AND_VERSION)
 
-setup-test-env:  create-ns create-keyring-secret
+setup-test-env: create-ns create-keyring-secret
 	@echo
 	@echo creating test namespace
 	kubectl create ns $(TEST_NS)
@@ -413,8 +413,8 @@ setup-tmp-cr:
 	yq write -i $(TMP_CR_AC_FILE) spec.admissionController.resources.limits.memory 256Mi
 	yq write -i $(TMP_CR_AC_FILE) spec.observer.image $(TMP_OBSERVER_IMG)
 	yq write -i $(TMP_CR_AC_FILE) spec.observer.imagePullPolicy Always
-	yq write -i $(TMP_CR_AC_FILE) spec.observer.resources.limits.cpu 100m
-	yq write -i $(TMP_CR_AC_FILE) spec.observer.resources.limits.memory 128Mi
+	yq write -i $(TMP_CR_AC_FILE) spec.observer.resources.limits.cpu 200m
+	yq write -i $(TMP_CR_AC_FILE) spec.observer.resources.limits.memory 256Mi
 
 create-tmp-cr:
 	kubectl apply -f $(TMP_CR_FILE) -n $(ISHIELD_NS)
